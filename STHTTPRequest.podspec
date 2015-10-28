@@ -9,5 +9,6 @@ Pod::Spec.new do |s|
   s.source_files  = 'STHTTPRequest.{h,m}'
   s.requires_arc  = true
   s.ios.deployment_target = '5.0'
+  s.watchos.deployment_target = '2.0'
   s.osx.deployment_target = '10.7'
 end
