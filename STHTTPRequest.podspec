@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name          = "STHTTPRequest"
-  s.version       = "1.0.3"
+  s.version       = "1.0.4"
   s.summary       = "A NSURLConnection wrapper for humans"
   s.homepage      = "https://github.com/nst/STHTTPRequest"
   s.license       = { :type => 'New BSD', :file => 'LICENSE.txt' }
