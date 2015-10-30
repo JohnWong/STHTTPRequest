@@ -47,7 +47,8 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
 @interface STHTTPRequest ()
 
 @property (nonatomic) NSInteger responseStatus;
-@property (nonatomic, strong) NSURLConnection *connection;
+@property (nonatomic, strong) NSURLSession *session;
+@property (nonatomic, strong) NSURLSessionDataTask *task;
 @property (nonatomic, strong) NSMutableData *responseData;
 @property (nonatomic, strong) NSString *responseStringEncodingName;
 @property (nonatomic, strong) NSDictionary *responseHeaders;
@@ -101,6 +102,7 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
         self.HTTPMethod = @"GET"; // default
         self.cookieStoragePolicyForInstance = STHTTPRequestCookiesStorageUndefined; // globalCookiesStoragePolicy will be used
         self.ephemeralRequestCookies = [NSMutableArray array];
+        self.session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:[NSOperationQueue mainQueue]];
     }
     
     return self;
@@ -782,11 +784,9 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     
     NSURLRequest *request = [self prepareURLRequest];
     
-    self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
-    [_connection scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-    [_connection start];
-    
-    self.request = [_connection currentRequest];
+    self.task = [self.session dataTaskWithRequest:request];
+    [self.task resume];
+    self.request = request;
     
     self.requestHeaders = [[_request allHTTPHeaderFields] mutableCopy];
     
@@ -821,8 +821,8 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     
     /**/
     
-    if(_connection == nil) {
-        NSString *s = @"can't create connection";
+    if(_session == nil) {
+        NSString *s = @"can't create session";
         self.error = [NSError errorWithDomain:NSStringFromClass([self class])
                                          code:0
                                      userInfo:@{NSLocalizedDescriptionKey: s}];
@@ -831,40 +831,8 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     }
 }
 
-- (NSString *)startSynchronousWithError:(NSError **)e {
-    
-    self.responseHeaders = nil;
-    self.responseStatus = 0;
-    
-    NSURLRequest *request = [self prepareURLRequest];
-    
-    NSURLResponse *urlResponse = nil;
-    
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&urlResponse error:e];
-    
-    self.responseData = [NSMutableData dataWithData:data];
-    
-    if([urlResponse isKindOfClass:[NSHTTPURLResponse class]]) {
-        
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)urlResponse;
-        
-        self.responseHeaders = [httpResponse allHeaderFields];
-        self.responseStatus = [httpResponse statusCode];
-        self.responseStringEncodingName = [httpResponse textEncodingName];
-    }
-    
-    self.responseString = [self stringWithData:_responseData encodingName:_responseStringEncodingName];
-    
-    if(_responseStatus >= 400) {
-        NSDictionary *userInfo = [[self class] userInfoWithErrorDescriptionForHTTPStatus:_responseStatus];
-        if(e) *e = [NSError errorWithDomain:NSStringFromClass([self class]) code:_responseStatus userInfo:userInfo];
-    }
-    
-    return _responseString;
-}
-
 - (void)cancel {
-    [_connection cancel];
+    [_task cancel];
     
     NSString *s = @"Connection was cancelled.";
     self.error = [NSError errorWithDomain:NSStringFromClass([self class])
@@ -874,53 +842,43 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     self.errorBlock(self.error);
 }
 
-#pragma mark NSURLConnectionDataDelegate
+#pragma mark NSURLSessionDataDelegate
 
-- (NSCachedURLResponse *)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse {
-    if(globalIgnoreCache || _ignoreCache) return nil;
-    
-    return cachedResponse;
+- (void)URLSession:(NSURLSession *)session
+          dataTask:(NSURLSessionDataTask *)dataTask
+ willCacheResponse:(NSCachedURLResponse *)proposedResponse
+ completionHandler:(void (^)(NSCachedURLResponse * __nullable cachedResponse))completionHandler {
+    if(globalIgnoreCache || _ignoreCache) return;
+    completionHandler(proposedResponse);
 }
 
-#pragma mark NSURLConnectionDelegate
+#pragma mark NSURLSessionTaskDelegate
 
-- (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse {
-    
-    if(_preventRedirections && redirectResponse) {
-        return nil;
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+willPerformHTTPRedirection:(NSHTTPURLResponse *)response
+        newRequest:(NSURLRequest *)request
+ completionHandler:(void (^)(NSURLRequest * __nullable))completionHandler {
+    if(_preventRedirections && response) {
+        return;
     }
-    
-    return request;
+    completionHandler(request);
 }
 
-- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    
-    NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
-    NSString *authenticationMethod = [protectionSpace authenticationMethod];
-    
-    if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest] ||
-        [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic]) {
-        
-        if([challenge previousFailureCount] == 0) {
-            NSURLCredential *credential = [self credentialForCurrentHost];
-            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-        } else {
-            [[[self class] sharedCredentialsStorage] removeObjectForKey:[_url host]];
-            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
-        }
-    } else {
-        [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+   didSendBodyData:(int64_t)bytesSent
+    totalBytesSent:(int64_t)totalBytesSent
+totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
     if (_uploadProgressBlock) {
-        _uploadProgressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
+        _uploadProgressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
     }
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    
+- (void)URLSession:(NSURLSession *)session
+          dataTask:(NSURLSessionDataTask *)dataTask
+didReceiveResponse:(NSURLResponse *)response
+ completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
     if([response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSHTTPURLResponse *r = (NSHTTPURLResponse *)response;
         self.responseHeaders = [r allHeaderFields];
@@ -928,25 +886,13 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
         self.responseStringEncodingName = [r textEncodingName];
         self.responseExpectedContentLength = [r expectedContentLength];
         
-        NSArray *responseCookies = [NSHTTPCookie cookiesWithResponseHeaderFields:_responseHeaders forURL:connection.currentRequest.URL];
+        NSArray *responseCookies = [NSHTTPCookie cookiesWithResponseHeaderFields:_responseHeaders forURL:dataTask.currentRequest.URL];
         for(NSHTTPCookie *cookie in responseCookies) {
             [self addCookie:cookie]; // won't store anything when STHTTPRequestCookiesStorageNoStorage
         }
     }
     
     [_responseData setLength:0];
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)theData {
-    
-    [_responseData appendData:theData];
-    
-    if (_downloadProgressBlock) {
-        _downloadProgressBlock(theData, [_responseData length], self.responseExpectedContentLength);
-    }
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     
     if(_responseStatus >= 400) {
         NSDictionary *userInfo = [[self class] userInfoWithErrorDescriptionForHTTPStatus:_responseStatus];
@@ -965,10 +911,44 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     }
 }
 
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)e {
-    self.error = e;
+- (void)URLSession:(NSURLSession *)session
+          dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data {
+    [_responseData appendData:data];
+    
+    if (_downloadProgressBlock) {
+        _downloadProgressBlock(data, [_responseData length], self.responseExpectedContentLength);
+    }
+}
+
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+didCompleteWithError:(nullable NSError *)error {
+    self.error = error;
     _errorBlock(_error);
 }
+
+#pragma mark NSURLConnectionDelegate
+//
+//- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+//    
+//    NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
+//    NSString *authenticationMethod = [protectionSpace authenticationMethod];
+//    
+//    if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest] ||
+//        [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic]) {
+//        
+//        if([challenge previousFailureCount] == 0) {
+//            NSURLCredential *credential = [self credentialForCurrentHost];
+//            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+//        } else {
+//            [[[self class] sharedCredentialsStorage] removeObjectForKey:[_url host]];
+//            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+//        }
+//    } else {
+//        [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
+//    }
+//}
 
 @end
 
@@ -980,7 +960,7 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     
     if ([[self domain] isEqualToString:@"STHTTPRequest"] && ([self code] == 401)) return YES;
     
-    if ([[self domain] isEqualToString:NSURLErrorDomain] && ([self code] == kCFURLErrorUserCancelledAuthentication || [self code] == kCFURLErrorUserAuthenticationRequired)) return YES;
+    if ([[self domain] isEqualToString:NSURLErrorDomain] && ([self code] == NSURLErrorUserCancelledAuthentication || [self code] == NSURLErrorUserAuthenticationRequired)) return YES;
     
     return NO;
 }

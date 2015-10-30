@@ -34,6 +34,8 @@
 		03E5FC9A1920ED3C007BE44D /* STHTTPRequest+UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E5FC951920ED3C007BE44D /* STHTTPRequest+UnitTests.m */; };
 		03E5FC9B1920ED3C007BE44D /* STHTTPRequestTestResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E5FC971920ED3C007BE44D /* STHTTPRequestTestResponse.m */; };
 		03E5FC9C1920ED3C007BE44D /* STHTTPRequestTestResponseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E5FC991920ED3C007BE44D /* STHTTPRequestTestResponseQueue.m */; };
+		525C07E81BE254940084304B /* watchkit.h in Headers */ = {isa = PBXBuildFile; fileRef = 525C07E71BE254940084304B /* watchkit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		525C07ED1BE2549D0084304B /* STHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 03191F1017BF75260001C06D /* STHTTPRequest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +104,9 @@
 		03E5FC971920ED3C007BE44D /* STHTTPRequestTestResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHTTPRequestTestResponse.m; sourceTree = "<group>"; };
 		03E5FC981920ED3C007BE44D /* STHTTPRequestTestResponseQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHTTPRequestTestResponseQueue.h; sourceTree = "<group>"; };
 		03E5FC991920ED3C007BE44D /* STHTTPRequestTestResponseQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHTTPRequestTestResponseQueue.m; sourceTree = "<group>"; };
+		525C07E51BE254940084304B /* watchkit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = watchkit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		525C07E71BE254940084304B /* watchkit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = watchkit.h; sourceTree = "<group>"; };
+		525C07E91BE254940084304B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +146,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		525C07E11BE254940084304B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -171,6 +183,7 @@
 				03E5FC721920EC67007BE44D /* Demo Project */,
 				03E5FC8A1920EC74007BE44D /* Unit Tests */,
 				0315A0471923D6DF001C6C02 /* cli */,
+				525C07E61BE254940084304B /* watchkit */,
 				03191ED317BF75060001C06D /* Frameworks */,
 				03191ED217BF75060001C06D /* Products */,
 			);
@@ -183,6 +196,7 @@
 				03191EF717BF75070001C06D /* STHTTPRequestTests.xctest */,
 				0315A0451923D6DF001C6C02 /* cli */,
 				038AB2D5199217120031C019 /* AsynchronousTests.xctest */,
+				525C07E51BE254940084304B /* watchkit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -242,7 +256,27 @@
 			path = ../../UnitTestAdditions;
 			sourceTree = "<group>";
 		};
+		525C07E61BE254940084304B /* watchkit */ = {
+			isa = PBXGroup;
+			children = (
+				525C07E71BE254940084304B /* watchkit.h */,
+				525C07E91BE254940084304B /* Info.plist */,
+			);
+			path = watchkit;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		525C07E21BE254940084304B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				525C07E81BE254940084304B /* watchkit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		0315A0441923D6DF001C6C02 /* cli */ = {
@@ -315,7 +349,25 @@
 			name = AsynchronousTests;
 			productName = DemoTests;
 			productReference = 038AB2D5199217120031C019 /* AsynchronousTests.xctest */;
-			productType = "com.apple.product-type.bundle.ocunit-test";
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		525C07E41BE254940084304B /* watchkit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 525C07EC1BE254940084304B /* Build configuration list for PBXNativeTarget "watchkit" */;
+			buildPhases = (
+				525C07E01BE254940084304B /* Sources */,
+				525C07E11BE254940084304B /* Frameworks */,
+				525C07E21BE254940084304B /* Headers */,
+				525C07E31BE254940084304B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = watchkit;
+			productName = watchkit;
+			productReference = 525C07E51BE254940084304B /* watchkit.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -325,6 +377,11 @@
 			attributes = {
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Nicolas Seriot";
+				TargetAttributes = {
+					525C07E41BE254940084304B = {
+						CreatedOnToolsVersion = 7.1;
+					};
+				};
 			};
 			buildConfigurationList = 03191ECC17BF75060001C06D /* Build configuration list for PBXProject "STHTTPRequest" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -342,6 +399,7 @@
 				03191EF617BF75070001C06D /* STHTTPRequestTests */,
 				038AB2C3199217120031C019 /* AsynchronousTests */,
 				0315A0441923D6DF001C6C02 /* cli */,
+				525C07E41BE254940084304B /* watchkit */,
 			);
 		};
 /* End PBXProject section */
@@ -367,6 +425,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		038AB2CF199217120031C019 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		525C07E31BE254940084304B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -443,6 +508,14 @@
 			files = (
 				038AB2D8199217420031C019 /* STHTTPRequestAsyncTests.m in Sources */,
 				038AB2C9199217120031C019 /* STHTTPRequest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		525C07E01BE254940084304B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				525C07ED1BE2549D0084304B /* STHTTPRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -697,6 +770,83 @@
 			};
 			name = Release;
 		};
+		525C07EA1BE254940084304B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = watchkit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnwong.watchkit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		525C07EB1BE254940084304B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = watchkit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnwong.watchkit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -744,6 +894,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		525C07EC1BE254940084304B /* Build configuration list for PBXNativeTarget "watchkit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				525C07EA1BE254940084304B /* Debug */,
+				525C07EB1BE254940084304B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
