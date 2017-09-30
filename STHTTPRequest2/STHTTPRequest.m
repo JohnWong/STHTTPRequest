@@ -871,39 +871,6 @@ static STHTTPRequestCookiesStorage globalCookiesStoragePolicy = STHTTPRequestCoo
     }
 }
 
-// TODO: rewrite synch requests without NSURLConnection
-- (NSString *)startSynchronousWithError:(NSError **)e {
-    
-    self.responseHeaders = nil;
-    self.responseStatus = 0;
-    
-    NSURLRequest *request = [self prepareURLRequest];
-    
-    NSURLResponse *urlResponse = nil;
-    
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&urlResponse error:e];
-    
-    self.responseData = [NSMutableData dataWithData:data];
-    
-    if([urlResponse isKindOfClass:[NSHTTPURLResponse class]]) {
-        
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)urlResponse;
-        
-        self.responseHeaders = [httpResponse allHeaderFields];
-        self.responseStatus = [httpResponse statusCode];
-        self.responseStringEncodingName = [httpResponse textEncodingName];
-    }
-    
-    self.responseString = [self stringWithData:_responseData encodingName:_responseStringEncodingName];
-    
-    if(_responseStatus >= 400) {
-        NSDictionary *userInfo = [[self class] userInfoWithErrorDescriptionForHTTPStatus:_responseStatus];
-        if(e) *e = [NSError errorWithDomain:NSStringFromClass([self class]) code:_responseStatus userInfo:userInfo];
-    }
-    
-    return _responseString;
-}
-
 - (void)cancel {
     [_task cancel];
     
@@ -1160,7 +1127,7 @@ didReceiveResponse:(NSURLResponse *)response
     
     if ([[self domain] isEqualToString:@"STHTTPRequest"] && ([self code] == 401)) return YES;
     
-    if ([[self domain] isEqualToString:NSURLErrorDomain] && ([self code] == kCFURLErrorUserCancelledAuthentication || [self code] == kCFURLErrorUserAuthenticationRequired)) return YES;
+    if ([[self domain] isEqualToString:NSURLErrorDomain] && ([self code] == NSURLErrorUserCancelledAuthentication || [self code] == NSURLErrorUserAuthenticationRequired)) return YES;
     
     return NO;
 }

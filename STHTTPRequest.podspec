@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.homepage      = "https://github.com/nst/STHTTPRequest"
   s.license       = { :type => 'New BSD', :file => 'LICENSE.txt' }
   s.authors       = 'Nicolas Seriot', 'Alistair Galbraith', 'Cyril Chandelier', 'Doug Ayers', 'Matthias Schmidt', 'Oktawian Chojnacki', 'Stephan Burlot', 'Zach Boyd'
-  s.source        = { :git => "https://github.com/JohnWong/STHTTPRequest.git", :tag => "1.0.4" }
+  s.source        = { :git => "https://github.com/JohnWong/STHTTPRequest.git", :tag => "1.0.5" }
   s.source_files  = 'STHTTPRequest.{h,m}'
   s.requires_arc  = true
   s.ios.deployment_target = '7.0'
